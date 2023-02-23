@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"strings"
 	"booking-app/helper"
+	"fmt"
+	"strconv"
 )
 
 // Syntatic sugar (Can't be used for constants)
@@ -15,7 +15,8 @@ const conferenceTickets = 50
 
 var remainingTickets uint = 50 // Unsigned int
 // Alternative: var bookings = [50]string{}
-var bookings []string // With size: array; without size: slice
+// With size: array; without size: slice
+var bookings = make([]map[string]string, 0) // Initialize a slice of maps
 
 func main() {
 	greetUsers()
@@ -58,8 +59,7 @@ func printFirstNames() {
 	// 2. For Each loop
 	firstNames := []string{}
 	for _, booking := range bookings { // Blank identifier
-		var names = strings.Fields(booking)
-		firstNames = append(firstNames, names[0])
+		firstNames = append(firstNames, booking["firstName"])
 	}
 	fmt.Printf("These are all our bookings: %v \n", firstNames)
 }
@@ -87,9 +87,16 @@ func getUserInputs() (string, string, string, int) {
 
 func bookTicket(userTickets uint, firstName string, lastName string, email string) {
 	remainingTickets = remainingTickets - userTickets
-	// bookings[0] = firstName + " " + lastName
-	bookings = append(bookings, firstName+" "+lastName)
 
+	// create a map for a user
+	var userData = make(map[string]string)
+	userData["firstName"] = firstName
+	userData["lastName"] = lastName
+	userData["email"] = email
+	userData["numberOfTickets"] = strconv.FormatUint(uint64(userTickets), 10)
+	bookings = append(bookings, userData)
+	fmt.Printf("List of bookings is: %v \n", bookings)
+	
 	/*
 		fmt.Printf("The first value: %v \n", bookings[0])
 		fmt.Printf("Slice type: %T \n", bookings)
