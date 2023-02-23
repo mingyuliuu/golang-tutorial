@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"booking-app/helper"
 )
 
 // Syntatic sugar (Can't be used for constants)
@@ -21,7 +22,7 @@ func main() {
 
 	for { // 1. Infinite loop
 		firstName, lastName, email, userTickets := getUserInputs()
-		isValidName, isValidEmail, isValidTicketNumber := validateUserInput(firstName, lastName, email, userTickets)
+		isValidName, isValidEmail, isValidTicketNumber := helper.ValidateUserInput(firstName, lastName, email, userTickets, remainingTickets)
 
 		if !isValidName || !isValidEmail || !isValidTicketNumber {
 			if !isValidName {
@@ -61,15 +62,6 @@ func printFirstNames() {
 		firstNames = append(firstNames, names[0])
 	}
 	fmt.Printf("These are all our bookings: %v \n", firstNames)
-}
-
-// Returning multiple values
-func validateUserInput(firstName string, lastName string, email string, userTickets int) (bool, bool, bool) {
-	var isValidName bool = len(firstName) >= 2 && len(lastName) >= 2
-	var isValidEmail bool = strings.Contains(email, "@")
-	var isValidTicketNumber bool = userTickets > 0 && userTickets <= int(remainingTickets)
-
-	return isValidName, isValidEmail, isValidTicketNumber
 }
 
 func getUserInputs() (string, string, string, int) {
