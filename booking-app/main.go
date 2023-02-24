@@ -3,6 +3,8 @@ package main
 import (
 	"booking-app/helper"
 	"fmt"
+	"sync"
+	"time"
 )
 
 // Syntatic sugar (Can't be used for constants)
@@ -23,6 +25,8 @@ type UserData struct {
 	email           string
 	numberOfTickets uint
 }
+
+var wg = sync.WaitGroup{}
 
 func main() {
 	greetUsers()
@@ -46,11 +50,16 @@ func main() {
 
 		bookTicket(uint(userTickets), firstName, lastName, email)
 
+		wg.Add(1) // Sets the number of goroutines to wait for
+		go sendTicket(uint(userTickets), firstName, lastName, email)
+
 		if remainingTickets == 0 {
 			fmt.Println("Our conference is booked out. Come back next year.")
 			break
 		}
 	}
+
+	wg.Wait() // Blocks until the WaitGroup counter is 0
 }
 
 func greetUsers() {
@@ -112,4 +121,16 @@ func bookTicket(userTickets uint, firstName string, lastName string, email strin
 	fmt.Printf("Thank you %v %v for booking %v tickets. You will receive a confirmation email at %v. \n", firstName, lastName, userTickets, email)
 	fmt.Printf("%v tickets remaining for %v. \n", remainingTickets, conferenceName)
 	printFirstNames()
+}
+
+func sendTicket(userTickets uint, firstName string, lastName string, email string) {
+	// The "sleep" function stops or blocks the current "thread" (goroutine) execution for the defined duration
+	time.Sleep(5 * time.Second)
+
+	var ticket = fmt.Sprintf("%v tickets for %v %v", userTickets, firstName, lastName)
+	fmt.Println("###############")
+	fmt.Printf("Sending ticket: \n%v to email address %v. \n", ticket, email)
+	fmt.Println("###############")
+
+	wg.Done() // Decrements the WaitGroup counter by 1
 }
