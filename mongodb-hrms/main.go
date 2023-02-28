@@ -15,6 +15,8 @@ func main() {
 
 	app.Get("/employee", helpers.GetAllEmployees)
 	app.Post("/employee", helpers.CreateEmployee)
-	app.Put("/employee/:id")
-	app.Delete("/employee/:id")
+	app.Put("/employee/:id", helpers.UpdateEmployee)
+	app.Delete("/employee/:id", helpers.DeleteEmployee)
+
+	log.Fatal(app.Listen(":3000"))
 }

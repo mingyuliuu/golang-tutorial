@@ -15,7 +15,7 @@ type MongoDBInstance struct {
 var MgDB MongoDBInstance
 
 const dbName = "golang-hrms"
-const mongoURI = "mongodb://localhost:27017" + dbName
+const mongoURI = "mongodb://localhost:27017/" + dbName
 
 func Connect() error {
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))

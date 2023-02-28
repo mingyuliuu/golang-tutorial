@@ -3,6 +3,8 @@ package helpers
 import (
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Employee struct {
@@ -49,4 +51,62 @@ func CreateEmployee(ctx *fiber.Ctx) error {
 	createdRecord.Decode(createdEmployee)
 
 	return ctx.Status(201).JSON(createdEmployee)
+}
+
+func UpdateEmployee(ctx *fiber.Ctx) error {
+	idParam := ctx.Params("id")
+
+	employeeID, err := primitive.ObjectIDFromHex(idParam)
+	if err != nil {
+		return ctx.SendStatus(400)
+	}
+
+	employee := new(Employee)
+	if err := ctx.BodyParser(employee); err != nil {
+		ctx.Status(400).SendString(err.Error())
+	}
+
+	query := bson.D{{Key: "_id", Value: employeeID}}
+	update := bson.D{
+		{
+			Key: "$set",
+			Value: bson.D{
+				{Key: "name", Value: employee.Name},
+				{Key: "age", Value: employee.Age},
+				{Key: "salary", Value: employee.Salary},
+			},
+		},
+	}
+
+	err = MgDB.Database.Collection("employees").FindOneAndUpdate(ctx.Context(), query, update).Err()
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return ctx.SendStatus(400)
+		}
+		return ctx.SendStatus(500)
+	}
+
+	employee.ID = idParam
+
+	return ctx.Status(200).JSON(employee)
+}
+
+func DeleteEmployee(ctx *fiber.Ctx) error {
+	employeeID, err := primitive.ObjectIDFromHex(ctx.Params("id"))
+	if err != nil {
+		return ctx.SendStatus(400)
+	}
+
+	query := bson.D{{Key: "_id", Value: employeeID}}
+	result, err := MgDB.Database.Collection("employees").DeleteOne(ctx.Context(), &query)
+
+	if err != nil {
+		return ctx.SendStatus(500)
+	}
+
+	if result.DeletedCount < 1 {
+		return ctx.SendStatus(404)
+	}
+
+	return ctx.Status(200).JSON("Record deleted.")
 }
